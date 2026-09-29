@@ -1,14 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Cairo } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: "--font-cairo",
-  weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "VoiceClear PWA | تحويل وتفريغ رسايل الواتساب لنص منقح بالذكاء الاصطناعي",
@@ -40,8 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable}>
+    <html lang="ar" dir="rtl">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
@@ -57,7 +55,7 @@ export default function RootLayout({
               color: '#f8fafc',
               border: '1px solid #1e293b',
               borderRadius: '1rem',
-              fontFamily: 'var(--font-cairo)',
+              fontFamily: "'Cairo', system-ui, -apple-system, sans-serif",
             },
           }}
         />

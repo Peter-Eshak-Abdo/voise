@@ -5,8 +5,8 @@ from google import genai
 # pip install google-genai
 # يجب التأكد من تثبيت أداة FFmpeg وإضافتها إلى مسار النظام (PATH)
 
-os.environ["AIzaSyB3O1blOxLJK20OkF1V8w--hVfaYxaDFrw"] = "AIzaSyB3O1blOxLJK20OkF1V8w--hVfaYxaDFrw"
-client = genai.Client(api_key=os.environ["AIzaSyB3O1blOxLJK20OkF1V8w--hVfaYxaDFrw"])
+os.environ["GEMINI_API_KEY"] = "GEMINI_API_KEY"
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 def convert_audio_format(input_file, output_file="temp_converted.wav"):
     subprocess.run(
