@@ -194,9 +194,7 @@ export async function POST(req: NextRequest) {
 
     return new NextResponse(html, {
       status: 200,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-      },
+      headers: {'Content-Type': 'text/html; charset=utf-8'},
     });
   } catch (error) {
     console.error('[Web Share Target Error]:', error);

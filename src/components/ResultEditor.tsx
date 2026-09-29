@@ -140,7 +140,7 @@ export const ResultEditor: React.FC<ResultEditorProps> = ({
           placeholder="سيظهر النص المنقح هنا..."
           rows={8}
           dir="rtl"
-          className="w-full bg-transparent resize-y text-slate-900 text-base md:text-lg leading-relaxed focus:outline-none placeholder:text-slate-400 font-sans selection:bg-emerald-100 min-h-[160px]"
+          className="w-full bg-transparent resize-y text-slate-900 text-base md:text-lg leading-relaxed focus:outline-none placeholder:text-slate-400 font-sans selection:bg-emerald-100 min-h-40"
         />
 
         {/* Quick Action Toolbar */}

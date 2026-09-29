@@ -21,7 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Brand & Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-linear-to-tr from-emerald-600 via-teal-500 to-emerald-400 p-[1px] shadow-sm shadow-emerald-500/10">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-linear-to-tr from-emerald-600 via-teal-500 to-emerald-400 p-px shadow-sm shadow-emerald-500/10">
             <div className="w-full h-full bg-white rounded-[15px] flex items-center justify-center">
               <Volume2 className="w-5 h-5 text-emerald-600 animate-pulse" />
             </div>
@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <History className="w-5 h-5" />
             {historyCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-emerald-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+              <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-emerald-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
                 {historyCount}
               </span>
             )}

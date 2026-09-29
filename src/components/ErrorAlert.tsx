@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertCircle, RotateCcw, ArrowRight } from 'lucide-react';
+import { AlertCircle, RotateCcw } from 'lucide-react';
 
 interface ErrorAlertProps {
   message: string;

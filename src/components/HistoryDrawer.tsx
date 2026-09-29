@@ -200,7 +200,7 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
                     className="group cursor-pointer rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-400 p-3.5 transition-all hover:bg-white relative shadow-2xs"
                   >
                     <div className="flex items-center justify-between text-[11px] text-slate-500 mb-2">
-                      <span className="font-semibold text-slate-800 truncate max-w-[180px]">
+                      <span className="font-semibold text-slate-800 truncate max-w-45">
                         {item.fileName}
                       </span>
                       <div className="flex items-center gap-1 font-mono text-[10px]">
