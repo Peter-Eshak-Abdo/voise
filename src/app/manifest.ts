@@ -19,5 +19,37 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    // Web Share Target API: enables WhatsApp to share audio directly to VoiceClear
+    share_target: {
+      action: '/share-target',
+      method: 'POST',
+      enctype: 'multipart/form-data',
+      params: {
+        title: 'title',
+        text: 'text',
+        files: [
+          {
+            name: 'audio',
+            accept: [
+              'audio/*',
+              '.opus',
+              '.ogg',
+              '.m4a',
+              '.wav',
+              '.mp3',
+              '.aac',
+              '.webm',
+              'audio/ogg',
+              'audio/opus',
+              'audio/mp4',
+              'audio/x-m4a',
+              'audio/wav',
+              'audio/mpeg',
+              'application/ogg',
+            ],
+          },
+        ],
+      },
+    },
   };
 }

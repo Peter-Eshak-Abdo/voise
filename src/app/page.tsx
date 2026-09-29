@@ -18,6 +18,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function Home() {
   const {
@@ -52,6 +53,47 @@ export default function Home() {
       .then((items) => setHistoryCount(items.length))
       .catch(() => {});
   }, [stage]);
+
+  // Handle incoming audio from WhatsApp via Web Share Target
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const rawShared = sessionStorage.getItem('voiceclear_shared_audio');
+      if (rawShared) {
+        sessionStorage.removeItem('voiceclear_shared_audio');
+        const parsed = JSON.parse(rawShared);
+        if (parsed.base64) {
+          const byteCharacters = atob(parsed.base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const sharedFile = new File(
+            [byteArray],
+            parsed.name || 'whatsapp_voice.ogg',
+            { type: parsed.type || 'audio/ogg' }
+          );
+
+          handleFileSelect(sharedFile);
+          toast.success('تم استلام الفويس من الواتساب بنجاح! 🎙️', {
+            description: 'جاهز الآن للتفريغ والتنقيح بالذكاء الاصطناعي.',
+          });
+
+          // Clean up ?shared query parameter from the URL
+          const url = new URL(window.location.href);
+          if (url.searchParams.has('shared') || url.searchParams.has('error')) {
+            url.searchParams.delete('shared');
+            url.searchParams.delete('error');
+            window.history.replaceState({}, '', url.pathname);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error restoring shared audio from session:', err);
+    }
+  }, [handleFileSelect]);
 
   const isProcessing = stage === 'contacting_ai' || stage === 'refining_text';
   const hasAudio = !!selectedFile;
