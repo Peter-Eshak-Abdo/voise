@@ -1,0 +1,21 @@
+{
+  "name": "VoiceClear PWA - تحويل صوتيات الواتساب لنص منقح",
+  "short_name": "VoiceClear",
+  "description": "تطبيق ويب لتفريغ رسائل الواتساب الصوتية وتحويلها إلى نص عربي فصيح ومنقح بذكاء اصطناعي فائق بدون حشو أو تردد.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090d16",
+  "theme_color": "#10b981",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"]
+}
