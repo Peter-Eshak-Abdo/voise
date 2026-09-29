@@ -1,28 +1,19 @@
 /**
- * VoiceClear PWA - Gemini AI 5-Stage Fallback Service
- * 
- * Sequentially queries the requested Gemini models in order:
- * 1. gemini-3.8-flash (Primary)
- * 2. gemini-3.5-pro   (Fallback 1)
- * 3. gemini-3.0-pro   (Fallback 2)
- * 4. gemini-2.5-flash (Fallback 3)
- * 5. gemini-2.0-pro   (Fallback 4)
- * 
- * If a model fails (HTTP 404, 429, 503, quota, or timeout),
- * it logs the diagnostic trail and immediately switches to the next model.
+ * VoiceClear PWA - Gemini AI Resilient Fallback Service
  */
 
 import { FallbackAttemptLog, GeminiModelId } from '@/types';
 
-export const GEMINI_FALLBACK_MODELS: GeminiModelId[] = [
-  'gemini-3.8-flash',
+export const GEMINI_FALLBACK_MODELS: string[] = [
+  'gemini-2.5-flash',       // Highly reliable, fast audio processing
+  'gemini-2.5-flash-lite',  // High throughput free-tier fallback
+  'gemini-3.8-flash',       // Next-gen flash
   'gemini-3.5-pro',
   'gemini-3.0-pro',
-  'gemini-2.5-flash',
-  'gemini-2.0-pro',
-  // High-availability safety anchors
+  'gemini-2.5-pro',
+  'gemini-2.0-flash',
   'gemini-flash-latest',
-  'gemini-pro-latest',
+  'gemini-1.5-flash',
 ];
 
 export const SYSTEM_VOICE_PROMPT = `أنت محرر نصوص ذكي. المستخدم بيتكلم بطبيعته.
@@ -40,9 +31,28 @@ export interface FallbackExecutionResult {
   trail: FallbackAttemptLog[];
 }
 
-/**
- * Normalizes audio MIME types for Gemini API inlineData
- */
+export function toUserFriendlyErrorMessage(errorMsg: string): string {
+  const lower = (errorMsg || '').toLowerCase();
+
+  if (lower.includes('quota') || lower.includes('429') || lower.includes('rate-limit') || lower.includes('rate limit')) {
+    return 'سيرفرات الذكاء الاصطناعي وصلت لحد الاستخدام المؤقت المجاني من جوجل. يرجى الانتظار نصف دقيقة والضغط على "حاول تاني".';
+  }
+  if (lower.includes('high demand') || lower.includes('spikes in demand') || lower.includes('503') || lower.includes('overloaded')) {
+    return 'الخدمة عليها ضغط مؤقت حالياً من شركة جوجل. يرجى الانتظار لحظات والضغط على "حاول تاني".';
+  }
+  if (lower.includes('aborted') || lower.includes('timeout')) {
+    return 'استغرقت معالجة الصوت وقتاً أطول من المعتاد بسبب بطء الاتصال، يرجى الضغط على "حاول تاني".';
+  }
+  if (lower.includes('key') || lower.includes('api_key') || lower.includes('unauthenticated')) {
+    return 'مفتاح الـ Gemini API بحاجة للتحقق في إعدادات البيئة (Vercel Environment Variables).';
+  }
+  if (lower.includes('not found') || lower.includes('404')) {
+    return 'حدث خطأ مؤقت في الاتصال بنموذج الذكاء الاصطناعي. يرجى إعادة المحاولة.';
+  }
+
+  return 'تعذر إكمال تفريغ الصوت في الوقت الحالي بسبب ضغط مؤقت على الخوادم. اضغط على "حاول تاني" لإعادة المعالجة.';
+}
+
 export function normalizeAudioMimeType(mimeType: string, fileName?: string): string {
   const lowerMime = (mimeType || '').toLowerCase();
   const lowerName = (fileName || '').toLowerCase();
@@ -51,7 +61,6 @@ export function normalizeAudioMimeType(mimeType: string, fileName?: string): str
     return 'audio/ogg';
   }
   if (lowerMime.includes('opus') || lowerName.endsWith('.opus')) {
-    // Gemini handles opus via audio/ogg or audio/opus
     return 'audio/ogg';
   }
   if (lowerMime.includes('wav') || lowerName.endsWith('.wav')) {
@@ -70,13 +79,9 @@ export function normalizeAudioMimeType(mimeType: string, fileName?: string): str
     return 'audio/aac';
   }
 
-  // Fallback to audio/ogg for WhatsApp audio notes
   return 'audio/ogg';
 }
 
-/**
- * Executes audio refinement with the 5-tier Gemini fallback architecture
- */
 export async function processAudioWithGeminiFallback(
   audioBase64: string,
   rawMimeType: string,
@@ -87,7 +92,7 @@ export async function processAudioWithGeminiFallback(
 
   if (!apiKey || apiKey.trim() === '' || apiKey === 'your_gemini_api_key_here') {
     throw new Error(
-      'مفتاح Gemini API Key غير مهيأ في متغيرات البيئة. يرجى إضافة GEMINI_API_KEY في ملف .env.local'
+      'مفتاح Gemini API Key غير مهيأ في متغيرات البيئة. يرجى إضافة GEMINI_API_KEY في إعدادات Vercel.'
     );
   }
 
@@ -103,9 +108,9 @@ export async function processAudioWithGeminiFallback(
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      // 7-second controller timeout per model attempt for fast fallback response
+      // 28-second timeout per attempt to give Gemini full time to transcribe audio
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 7000);
+      const timeoutId = setTimeout(() => controller.abort(), 28000);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -128,7 +133,7 @@ export async function processAudioWithGeminiFallback(
             },
           ],
           generationConfig: {
-            temperature: 0.2, // Low temperature for high accuracy transcription & text refinement
+            temperature: 0.2,
             maxOutputTokens: 4096,
           },
         }),
@@ -147,7 +152,7 @@ export async function processAudioWithGeminiFallback(
             parsedMessage = jsonErr.error.message;
           }
         } catch {
-          // ignore json parse error
+          // ignore
         }
 
         trail.push({
@@ -159,7 +164,7 @@ export async function processAudioWithGeminiFallback(
           timestamp: new Date().toISOString(),
         });
 
-        console.warn(`[Gemini Fallback] Model ${model} failed (${response.status}): ${parsedMessage}. Trying next model...`);
+        console.warn(`[Gemini Fallback] Model ${model} failed (${response.status}). Trying next model...`);
         continue;
       }
 
@@ -170,7 +175,7 @@ export async function processAudioWithGeminiFallback(
         trail.push({
           model,
           success: false,
-          error: 'استجاب الموديل بدون نص (Empty Content/Filter Triggered)',
+          error: 'استجاب الموديل بدون نص',
           durationMs: attemptDuration,
           timestamp: new Date().toISOString(),
         });
@@ -208,9 +213,11 @@ export async function processAudioWithGeminiFallback(
     }
   }
 
-  // If all models in the fallback chain were exhausted
-  const lastError = trail[trail.length - 1]?.error || 'فشلت جميع موديلات Gemini البديلة في معالجة الملف الصوتي';
-  const error = new Error(`تعذر معالجة الصوت: ${lastError}`);
-  (error as unknown as { trail: FallbackAttemptLog[] }).trail = trail;
-  throw error;
+  // If all models failed, pick the most descriptive error and convert it to a friendly message
+  const lastError = trail[trail.length - 1]?.error || 'فشلت الموديلات في المعالجة';
+  const friendlyMessage = toUserFriendlyErrorMessage(lastError);
+
+  const finalError = new Error(friendlyMessage);
+  (finalError as unknown as { trail: FallbackAttemptLog[] }).trail = trail;
+  throw finalError;
 }

@@ -9,7 +9,7 @@ const FUNNY_STAGES = [
   '✂️ بنقصقص الـ "آآآآ" و"امممم" والتردد والكحة...',
   '🧠 لو غلطت وصلحت لنفسك في الجملة.. بنطلع المقصد النهائي بس...',
   '✨ بنظبط علامات الترقيم وصياغة الجمل لتبقى مفهومة وشيك...',
-  '🚀 موديل Gemini بيكتب اللمسات الأخيرة قبل التسليم...',
+  '🚀 بنضع اللمسات الأخيرة للنص المنقح...',
 ];
 
 export const ProcessingAnimation: React.FC = () => {
@@ -24,18 +24,18 @@ export const ProcessingAnimation: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col items-center justify-center py-10 px-4 text-center">
-      {/* Central Visualizer Pod */}
+      {/* Central Visualizer Pod (Light Mode) */}
       <div className="relative w-36 h-36 md:w-44 md:h-44 flex items-center justify-center mb-6">
         {/* Animated Concentric Rings */}
         <motion.div
-          animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.7, 0.3] }}
+          animate={{ scale: [1, 1.25, 1], opacity: [0.3, 0.6, 0.3] }}
           transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-          className="absolute inset-0 rounded-full border border-emerald-500/30 bg-emerald-500/5 blur-sm"
+          className="absolute inset-0 rounded-full border border-emerald-300 bg-emerald-50/50 blur-sm"
         />
         <motion.div
-          animate={{ scale: [1.1, 1.45, 1.1], opacity: [0.15, 0.4, 0.15] }}
+          animate={{ scale: [1.1, 1.45, 1.1], opacity: [0.2, 0.4, 0.2] }}
           transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut', delay: 0.4 }}
-          className="absolute inset-0 rounded-full border border-teal-400/20 bg-teal-500/5"
+          className="absolute inset-0 rounded-full border border-teal-200 bg-teal-50/30"
         />
 
         {/* Orbiting AI Sparkles */}
@@ -44,12 +44,12 @@ export const ProcessingAnimation: React.FC = () => {
           transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
           className="absolute inset-0 flex items-center justify-between pointer-events-none p-1"
         >
-          <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/80" />
-          <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/80" />
+          <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-md shadow-emerald-500/50" />
+          <div className="w-2 h-2 rounded-full bg-teal-400 shadow-md shadow-teal-400/50" />
         </motion.div>
 
         {/* Central Core Pod */}
-        <div className="relative z-10 w-24 h-24 md:w-28 md:h-28 rounded-3xl bg-slate-900/90 border border-emerald-500/40 shadow-2xl shadow-emerald-950 flex flex-col items-center justify-center p-3 overflow-hidden backdrop-blur-md">
+        <div className="relative z-10 w-24 h-24 md:w-28 md:h-28 rounded-3xl bg-white border border-emerald-300 shadow-xl shadow-emerald-500/10 flex flex-col items-center justify-center p-3 overflow-hidden">
           {/* Equalizer Bars morphing */}
           <div className="flex items-center gap-1.5 h-12">
             {[0.4, 0.8, 1, 0.6, 0.9, 0.5, 0.7].map((heightRatio, i) => (
@@ -65,19 +65,19 @@ export const ProcessingAnimation: React.FC = () => {
                   ease: 'easeInOut',
                   delay: i * 0.1,
                 }}
-                className="w-1.5 rounded-full bg-linear-to-t from-emerald-500 via-teal-400 to-cyan-300"
+                className="w-1.5 rounded-full bg-linear-to-t from-emerald-600 via-teal-500 to-emerald-400"
               />
             ))}
           </div>
 
-          <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-emerald-400">
+          <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-emerald-700">
             <Sparkles className="w-2.5 h-2.5 animate-spin" />
             <span>AI Listening</span>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Entertaining Status Message */}
+      {/* Dynamic Status Message */}
       <div className="h-16 flex items-center justify-center max-w-md px-4">
         <AnimatePresence mode="wait">
           <motion.div
@@ -86,7 +86,7 @@ export const ProcessingAnimation: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="flex items-center gap-2 text-sm md:text-base font-semibold text-slate-200"
+            className="flex items-center gap-2 text-sm md:text-base font-bold text-slate-800"
           >
             <span>{FUNNY_STAGES[stageIndex]}</span>
           </motion.div>
@@ -94,7 +94,7 @@ export const ProcessingAnimation: React.FC = () => {
       </div>
 
       <p className="text-xs text-slate-500 mt-2 font-mono">
-        يستغرق التفريغ والتنقيح عادة بين 4 إلى 12 ثانية فقط
+        يستغرق التفريغ والتنقيح عادة ثوانٍ معدودة فقط
       </p>
     </div>
   );

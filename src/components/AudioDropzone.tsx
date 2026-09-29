@@ -107,7 +107,7 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
       />
 
       {!selectedFile ? (
-        /* Empty Upload Dropzone */
+        /* Empty Upload Dropzone (Light Mode) */
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -116,30 +116,27 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
           className={`relative group cursor-pointer border-2 border-dashed rounded-3xl p-6 md:p-8 transition-all duration-300 flex flex-col items-center justify-center text-center overflow-hidden
             ${
               isDragOver
-                ? 'border-emerald-400 bg-emerald-500/10 scale-[1.01] shadow-xl shadow-emerald-500/10'
-                : 'border-slate-800 hover:border-emerald-500/40 bg-slate-900/40 hover:bg-slate-900/70'
+                ? 'border-emerald-500 bg-emerald-50/60 scale-[1.01] shadow-md shadow-emerald-500/10'
+                : 'border-slate-300 hover:border-emerald-500 bg-white hover:bg-slate-50/60 shadow-xs'
             }
             ${disabled ? 'opacity-50 pointer-events-none' : ''}
           `}
         >
-          {/* Subtle Ambient Radial Glow */}
-          <div className="absolute inset-0 bg-linear-to-b from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
           {/* Central Animated Icon */}
           <div className="relative mb-4 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-linear-to-tr from-emerald-600/20 to-teal-500/30 border border-emerald-500/30 flex items-center justify-center group-hover:scale-110 group-hover:border-emerald-400 transition-transform">
-              <UploadCloud className="w-8 h-8 text-emerald-400 group-hover:animate-bounce" />
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center group-hover:scale-105 group-hover:border-emerald-400 transition-transform">
+              <UploadCloud className="w-8 h-8 text-emerald-600 group-hover:animate-bounce" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-900 border border-emerald-500/40 flex items-center justify-center">
-              <FileAudio className="w-3.5 h-3.5 text-teal-300" />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white border border-emerald-300 flex items-center justify-center shadow-xs">
+              <FileAudio className="w-3.5 h-3.5 text-emerald-600" />
             </div>
           </div>
 
-          <h3 className="text-base md:text-lg font-bold text-slate-100 mb-1">
+          <h3 className="text-base md:text-lg font-bold text-slate-800 mb-1">
             اضغط لاختيار أو اسحب فويس الواتساب هنا
           </h3>
-          <p className="text-xs md:text-sm text-slate-400 max-w-sm mb-4">
-            يدعم ملفات الواتساب الصوتية مباشرة بدون الحاجة لتحويلها
+          <p className="text-xs md:text-sm text-slate-500 max-w-sm mb-4">
+            يدعم ملفات الواتساب الصوتية مباشرة بدون الحاجة لأي برامج تحويل
           </p>
 
           {/* Format Badges */}
@@ -147,7 +144,7 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
             {['.opus', '.ogg', '.m4a', '.wav', '.mp3'].map((format) => (
               <span
                 key={format}
-                className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-lg bg-slate-800/80 text-emerald-300 border border-slate-700/60"
+                className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200"
               >
                 {format}
               </span>
@@ -155,8 +152,8 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
           </div>
         </div>
       ) : (
-        /* Selected Audio Preview Card */
-        <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-linear-to-b from-slate-900/90 to-slate-950 p-5 shadow-xl shadow-emerald-950/20">
+        /* Selected Audio Preview Card (Light Mode) */
+        <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-white p-5 shadow-md shadow-emerald-500/5">
           <audio
             ref={audioPlayerRef}
             src={audioUrl || ''}
@@ -168,18 +165,18 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
 
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                <Music className="w-6 h-6 text-emerald-400" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                <Music className="w-6 h-6 text-emerald-600" />
               </div>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-sm font-bold text-slate-100 truncate" title={selectedFile.name}>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <p className="text-sm font-bold text-slate-800 truncate" title={selectedFile.name}>
                     {selectedFile.name}
                   </p>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • جاهز للتفريغ الذكي
                 </p>
               </div>
@@ -189,7 +186,7 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
             {!disabled && (
               <button
                 onClick={onClear}
-                className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
+                className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
                 title="إلغاء الملف واختيار غيره"
               >
                 <Trash2 className="w-4 h-4" />
@@ -199,11 +196,11 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
 
           {/* Interactive Mini Player */}
           {audioUrl && (
-            <div className="bg-slate-950/60 rounded-2xl p-3 border border-slate-800/80 flex items-center gap-3">
+            <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200 flex items-center gap-3">
               <button
                 type="button"
                 onClick={togglePlayAudio}
-                className="w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-md shadow-emerald-500/30"
+                className="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm shadow-emerald-600/20 cursor-pointer"
                 title={isPlaying ? 'إيقاف مؤقت' : 'استماع للملف'}
               >
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
@@ -211,15 +208,15 @@ export const AudioDropzone: React.FC<AudioDropzoneProps> = ({
 
               <div className="flex-1">
                 {/* Progress bar */}
-                <div className="relative w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="relative w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
-                    className="absolute top-0 bottom-0 left-0 bg-linear-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-100"
+                    className="absolute top-0 bottom-0 left-0 bg-emerald-600 rounded-full transition-all duration-100"
                     style={{
                       width: `${audioDuration > 0 ? (currentTime / audioDuration) * 100 : 0}%`,
                     }}
                   />
                 </div>
-                <div className="flex justify-between text-[11px] text-slate-400 mt-1 font-mono">
+                <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
                   <span>{formatDuration(currentTime)}</span>
                   <span>{audioDuration > 0 ? formatDuration(audioDuration) : '--:--'}</span>
                 </div>

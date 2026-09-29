@@ -43,7 +43,7 @@ export default function RootLayout({
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
-      <body className="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+      <body className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased selection:bg-emerald-500/20 selection:text-emerald-900">
         {children}
         <Toaster
           position="top-center"
@@ -51,9 +51,10 @@ export default function RootLayout({
           richColors
           toastOptions={{
             style: {
-              background: '#0f172a',
-              color: '#f8fafc',
-              border: '1px solid #1e293b',
+              background: '#ffffff',
+              color: '#0f172a',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
               borderRadius: '1rem',
               fontFamily: "'Cairo', system-ui, -apple-system, sans-serif",
             },
