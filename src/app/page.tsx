@@ -49,46 +49,190 @@ export default function Home() {
       .catch(() => {});
   }, [stage]);
 
-  // Handle incoming audio from WhatsApp via Web Share Target
+  // Handle incoming audio from WhatsApp via Web Share Target (Multi-Storage Bridge)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    try {
-      const rawShared = sessionStorage.getItem('voiceclear_shared_audio');
-      if (rawShared) {
-        sessionStorage.removeItem('voiceclear_shared_audio');
-        const parsed = JSON.parse(rawShared);
-        if (parsed.base64) {
-          const byteCharacters = atob(parsed.base64);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const sharedFile = new File(
-            [byteArray],
-            parsed.name || 'whatsapp_voice.ogg',
-            { type: parsed.type || 'audio/ogg' }
-          );
+    let isCancelled = false;
 
-          handleFileSelect(sharedFile);
-          toast.success('تم استلام الفويس من الواتساب بنجاح! 🎙️', {
-            description: 'جاهز الآن للتفريغ والتنقيح بالذكاء الاصطناعي.',
-          });
+    async function checkAndLoadSharedAudio() {
+      try {
+        let fileToLoad: File | null = null;
 
-          // Clean up ?shared query parameter from the URL
-          const url = new URL(window.location.href);
-          if (url.searchParams.has('shared') || url.searchParams.has('error')) {
-            url.searchParams.delete('shared');
-            url.searchParams.delete('error');
-            window.history.replaceState({}, '', url.pathname);
+        // 1. Check CacheStorage first (Native blob, zero length limits, cross-window)
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open('voiceclear-shared-cache');
+            const cachedRes = await cache.match('/shared-audio-file');
+            if (cachedRes) {
+              const blob = await cachedRes.blob();
+              if (blob && blob.size > 0) {
+                const rawName = cachedRes.headers.get('X-File-Name');
+                const fileName = rawName ? decodeURIComponent(rawName) : 'whatsapp_voice.ogg';
+                const mimeType = cachedRes.headers.get('Content-Type') || blob.type || 'audio/ogg';
+                fileToLoad = new File([blob], fileName, { type: mimeType });
+                await cache.delete('/shared-audio-file');
+              }
+            }
+          } catch (e) {
+            console.warn('CacheStorage read error:', e);
           }
         }
+
+        // 2. Check IndexedDB if not found in CacheStorage
+        if (!fileToLoad && 'indexedDB' in window) {
+          try {
+            fileToLoad = await new Promise<File | null>((resolve) => {
+              const req = indexedDB.open('voiceclear-share-db', 2);
+              req.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+                const db = (e.target as IDBOpenDBRequest).result;
+                if (!db.objectStoreNames.contains('shared')) {
+                  db.createObjectStore('shared', { keyPath: 'id' });
+                }
+              };
+              req.onsuccess = (e: Event) => {
+                try {
+                  const db = (e.target as IDBOpenDBRequest).result;
+                  if (!db.objectStoreNames.contains('shared')) {
+                    resolve(null);
+                    return;
+                  }
+                  const tx = db.transaction('shared', 'readwrite');
+                  const store = tx.objectStore('shared');
+                  const getReq = store.get('latest_share');
+                  getReq.onsuccess = () => {
+                    const res = getReq.result;
+                    if (res) {
+                      store.delete('latest_share');
+                      if (res.blob instanceof Blob && res.blob.size > 0) {
+                        const f = new File(
+                          [res.blob],
+                          res.payload?.name || 'whatsapp_voice.ogg',
+                          { type: res.payload?.type || res.blob.type || 'audio/ogg' }
+                        );
+                        resolve(f);
+                        return;
+                      } else if (res.payload?.base64) {
+                        const byteChars = atob(res.payload.base64);
+                        const u8 = new Uint8Array(byteChars.length);
+                        for (let i = 0; i < byteChars.length; i++) {
+                          u8[i] = byteChars.charCodeAt(i);
+                        }
+                        const f = new File([u8], res.payload.name || 'whatsapp_voice.ogg', {
+                          type: res.payload.type || 'audio/ogg',
+                        });
+                        resolve(f);
+                        return;
+                      }
+                    }
+                    resolve(null);
+                  };
+                  getReq.onerror = () => resolve(null);
+                } catch {
+                  resolve(null);
+                }
+              };
+              req.onerror = () => resolve(null);
+              setTimeout(() => resolve(null), 800);
+            });
+          } catch (e) {
+            console.warn('IndexedDB read error:', e);
+          }
+        }
+
+        // 3. Check localStorage
+        if (!fileToLoad) {
+          try {
+            const raw = localStorage.getItem('voiceclear_shared_audio');
+            if (raw) {
+              localStorage.removeItem('voiceclear_shared_audio');
+              const parsed = JSON.parse(raw);
+              if (parsed.base64) {
+                const byteChars = atob(parsed.base64);
+                const u8 = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                  u8[i] = byteChars.charCodeAt(i);
+                }
+                fileToLoad = new File([u8], parsed.name || 'whatsapp_voice.ogg', {
+                  type: parsed.type || 'audio/ogg',
+                });
+              }
+            }
+          } catch (e) {
+            console.warn('localStorage read error:', e);
+          }
+        }
+
+        // 4. Check sessionStorage
+        if (!fileToLoad) {
+          try {
+            const raw = sessionStorage.getItem('voiceclear_shared_audio');
+            if (raw) {
+              sessionStorage.removeItem('voiceclear_shared_audio');
+              const parsed = JSON.parse(raw);
+              if (parsed.base64) {
+                const byteChars = atob(parsed.base64);
+                const u8 = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                  u8[i] = byteChars.charCodeAt(i);
+                }
+                fileToLoad = new File([u8], parsed.name || 'whatsapp_voice.ogg', {
+                  type: parsed.type || 'audio/ogg',
+                });
+              }
+            }
+          } catch (e) {
+            console.warn('sessionStorage read error:', e);
+          }
+        }
+
+        if (isCancelled || !fileToLoad) return;
+
+        // Clean up URL parameters
+        const url = new URL(window.location.href);
+        const shouldAutostart =
+          url.searchParams.get('autostart') === '1' ||
+          url.searchParams.get('shared') === '1';
+
+        if (
+          url.searchParams.has('shared') ||
+          url.searchParams.has('autostart') ||
+          url.searchParams.has('error')
+        ) {
+          url.searchParams.delete('shared');
+          url.searchParams.delete('autostart');
+          url.searchParams.delete('error');
+          window.history.replaceState({}, '', url.pathname);
+        }
+
+        // Put audio into dropzone and player
+        handleFileSelect(fileToLoad);
+
+        toast.success('تم استلام الفويس من الواتساب بنجاح! 🎙️', {
+          description: shouldAutostart
+            ? 'جاري بدء التفريغ والتنقيح التلقائي بالذكاء الاصطناعي...'
+            : 'جاهز الآن للتفريغ والتنقيح.',
+        });
+
+        // Automatically trigger AI transcription without requiring user click!
+        if (shouldAutostart) {
+          setTimeout(() => {
+            if (!isCancelled) {
+              processAudio(fileToLoad);
+            }
+          }, 400);
+        }
+      } catch (err) {
+        console.error('Error restoring shared audio:', err);
       }
-    } catch (err) {
-      console.error('Error restoring shared audio from session:', err);
     }
-  }, [handleFileSelect]);
+
+    checkAndLoadSharedAudio();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [handleFileSelect, processAudio]);
 
   const isProcessing = stage === 'contacting_ai' || stage === 'refining_text';
   const hasAudio = !!selectedFile;
@@ -228,7 +372,7 @@ export default function Home() {
                   >
                     <button
                       type="button"
-                      onClick={processAudio}
+                      onClick={() => processAudio()}
                       className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base flex items-center justify-center gap-2.5 shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all cursor-pointer"
                     >
                       <Sparkles className="w-5 h-5 fill-current" />

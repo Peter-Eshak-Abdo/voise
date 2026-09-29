@@ -31,7 +31,7 @@ interface UseVoiceTranscriptionReturn {
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
   cancelRecording: () => void;
-  processAudio: () => Promise<void>;
+  processAudio: (fileOverride?: File) => Promise<void>;
   retryProcessing: () => Promise<void>;
   setRefinedText: (text: string) => void;
   resetAll: () => void;
@@ -174,8 +174,17 @@ export function useVoiceTranscription(): UseVoiceTranscriptionReturn {
   }, [isRecording]);
 
   // Process the audio through Gemini 5-stage fallback
-  const processAudio = useCallback(async () => {
-    if (!audioBlob && !selectedFile) {
+  const processAudio = useCallback(async (fileOverride?: File) => {
+    const fileToUpload =
+      fileOverride ||
+      selectedFile ||
+      (audioBlob
+        ? new File([audioBlob], 'whatsapp_voice.ogg', {
+            type: audioBlob?.type || 'audio/ogg',
+          })
+        : null);
+
+    if (!fileToUpload) {
       toast.error('يرجى اختيار أو تسجيل ملف صوتي أولاً.');
       return;
     }
@@ -184,12 +193,6 @@ export function useVoiceTranscription(): UseVoiceTranscriptionReturn {
     setErrorMessage(null);
 
     try {
-      const fileToUpload =
-        selectedFile ||
-        new File([audioBlob!], 'whatsapp_voice.ogg', {
-          type: audioBlob?.type || 'audio/ogg',
-        });
-
       const formData = new FormData();
       formData.append('audio', fileToUpload);
 
